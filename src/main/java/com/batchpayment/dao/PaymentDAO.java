@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.batchpayment.model.Payment;
 import com.batchpayment.util.DBConnection;
+import java.util.regex.Pattern;
 
 public class PaymentDAO {
 
@@ -62,6 +63,7 @@ public class PaymentDAO {
                 Payment p = new Payment();
 
                 p.setId(rs.getInt("id"));
+                p.setFailureReason(rs.getString("failure_reason"));
                 p.setStudentName(rs.getString("student_name"));
                 p.setAccountNumber(rs.getString("account_number"));
                 p.setIfsc(rs.getString("ifsc"));
@@ -89,17 +91,59 @@ public class PaymentDAO {
 
             Connection con = DBConnection.getConnection();
 
-            String sql = "UPDATE payment SET status = ?, batch_id = ? WHERE status = ?";
+            // Pending payments fetch karo
+            String selectSql = "SELECT * FROM payment WHERE status='Pending'";
+            PreparedStatement psSelect = con.prepareStatement(selectSql);
+            ResultSet rs = psSelect.executeQuery();
 
-            PreparedStatement ps = con.prepareStatement(sql);
+            boolean processed = false;
 
-            ps.setString(1, "Processed");
-            ps.setString(2, batchId);
-            ps.setString(3, "Pending");
+            while (rs.next()) {
 
-            int rows = ps.executeUpdate();
+                int id = rs.getInt("id");
+                String account = rs.getString("account_number");
+                String ifsc = rs.getString("ifsc");
 
-            return rows > 0;
+                String status = "";
+                String reason = "";
+
+                // Account Number Validation
+                if (!Pattern.matches("\\d{12}", account)) {
+
+                    status = "Failed";
+                    reason = "Invalid Account Number";
+
+                }
+
+                // IFSC Validation
+                else if (!Pattern.matches("^[A-Z]{4}0[A-Z0-9]{6}$", ifsc)) {
+
+                    status = "Failed";
+                    reason = "Invalid IFSC";
+
+                }
+
+                else {
+
+                    status = "Processed";
+                    reason = "";
+
+                }
+
+                String updateSql = "UPDATE payment SET status=?, batch_id=?, failure_reason=? WHERE id=?";
+                PreparedStatement psUpdate = con.prepareStatement(updateSql);
+
+                psUpdate.setString(1, status);
+                psUpdate.setString(2, batchId);
+                psUpdate.setString(3, reason);
+                psUpdate.setInt(4, id);
+
+                psUpdate.executeUpdate();
+
+                processed = true;
+            }
+
+            return processed;
 
         } catch (Exception e) {
 

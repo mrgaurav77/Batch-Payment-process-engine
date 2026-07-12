@@ -27,7 +27,6 @@ public class AddPaymentServlet extends HttpServlet {
         if (dao.addPayment(p)) {
 
             response.sendRedirect("viewPayments.jsp");
-            // response.getWriter().println("<h1>Payment Added Successfully</h1>");
 
         } else {
 

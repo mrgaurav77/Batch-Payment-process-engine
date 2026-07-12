@@ -65,4 +65,14 @@ public class Payment {
     public void setBatchId(String batchId) {
         this.batchId = batchId;
     }
+
+    private String failureReason;
+
+    public String getFailureReason() {
+        return failureReason;
+    }
+
+    public void setFailureReason(String failureReason) {
+        this.failureReason = failureReason;
+    }
 }

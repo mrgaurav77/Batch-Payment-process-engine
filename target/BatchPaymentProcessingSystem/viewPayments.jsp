@@ -66,6 +66,7 @@
                         <th>Amount</th>
                         <th>Status</th>
                         <th>Batch</th>
+                        <th>Failure Reason</th>
 
                     </tr>
 
@@ -98,11 +99,44 @@
                             </td>
 
                             <td>
-                                <%=p.getStatus()%>
+
+                                <% if("Processed".equals(p.getStatus())){ %>
+
+                                    <span style="color:green;font-weight:bold;">
+                                        <%=p.getStatus()%>
+                                    </span>
+
+                                    <% }else if("Failed".equals(p.getStatus())){ %>
+
+                                        <span style="color:red;font-weight:bold;">
+                                            <%=p.getStatus()%>
+                                        </span>
+
+                                        <% }else{ %>
+
+                                            <%=p.getStatus()%>
+
+                                                <% } %>
+
                             </td>
 
                             <td>
                                 <%=p.getBatchId()%>
+                            </td>
+                            <td>
+
+                                <% if(p.getFailureReason()==null || p.getFailureReason().equals("")){ %>
+
+                                    -
+
+                                    <% }else{ %>
+
+                                        <span style="color:red;">
+                                            <%=p.getFailureReason()%>
+                                        </span>
+
+                                        <% } %>
+
                             </td>
 
                         </tr>
